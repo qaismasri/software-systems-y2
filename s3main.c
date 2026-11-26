@@ -25,7 +25,8 @@ int main(int argc, char *argv[]){
     }
 
     return 0;
-    /// 0 means error, since while loop is infinite loop
+    /// 0 means successful return
     /// only time return used is when user exits program: TO ADD
+    /// but until then shell runs infinite while loop (1)
     
 }

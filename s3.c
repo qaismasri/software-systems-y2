@@ -51,13 +51,9 @@ void parse_command(char line[], char *args[], int *argsc)
 ///Launch related functions
 void child(char *args[], int argsc)
 {
-    ///Implement this function:
+    execvp(args[ARG_PROGNAME], args);
 
-    ///Use execvp to load the binary 
-    ///of the command specified in args[ARG_PROGNAME].
-    ///For reference, see the code in lecture 3
-    char *argv[] = {"wc", "text1.txt", NULL};
-    execvp("wc", argv);
+    ///error if execvp doesnt execute, with exit out of shell
     perror("failed to execute child process");
     exit(1);
 }
@@ -74,4 +70,43 @@ void launch_program(char *args[], int argsc)
     ///Handle the 'exit' command;
     ///so that the shell, not the child process,
     ///exits.
+
+    ///CASE 1: No command entered, empty line
+    if(argsc == 0){
+        return;
+        ///void type used, not int
+    }
+
+    ///CASE 2: user initiates exit
+    if(strcmp(args[ARG_PROGNAME], "exit")){
+        exit(0);
+    }
+
+    ///CASE 3: user performs action
+    pid_t rc = fork();
+
+    if(rc < 0){
+        perror("forking child failed");
+        exit(1);
+    }
+    else if(rc == 0){
+        child(*args, argsc);
+    }
+
+    /* Extension: DEBUGGING WHETHER CHILD EXITED CORRECTLY:
+    FETCH STATUS OF WAIT BEFORE REAPING
+    
+    else{
+        int status;
+        waitpid(rc, &status, 0);
+
+        if (WIFEXITED(status)){
+            last_exit_status = WEXITSTATUS(status);
+        }
+        else{
+            last_exit_status = -1;
+        }
+    }
+    */
+
 }
