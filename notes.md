@@ -8,3 +8,5 @@ Every function declared in s3.h is like a promise, and the declared function mus
 Use perror vs printf to print errors since perror prints level 2 descriptors (printf prints level 1 descriptors)
 if printf is used, if output is written to external fstreams like out.txt, error messages written to that file instead of terminal.
 
+Build shell with gcc -Wall *.c -o s3
+./s3

@@ -78,7 +78,7 @@ void launch_program(char *args[], int argsc)
     }
 
     ///CASE 2: user initiates exit
-    if(strcmp(args[ARG_PROGNAME], "exit")){
+    if(!strcmp(args[ARG_PROGNAME], "exit")){
         exit(0);
     }
 
@@ -90,7 +90,7 @@ void launch_program(char *args[], int argsc)
         exit(1);
     }
     else if(rc == 0){
-        child(*args, argsc);
+        child(args, argsc);
     }
 
     /* Extension: DEBUGGING WHETHER CHILD EXITED CORRECTLY:
