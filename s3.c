@@ -56,7 +56,7 @@ void child(char *args[], int argsc)
     ///Use execvp to load the binary 
     ///of the command specified in args[ARG_PROGNAME].
     ///For reference, see the code in lecture 3
-    char *argv[] = {"wc", "text1.txt", NULL}
+    char *argv[] = {"wc", "text1.txt", NULL};
     execvp("wc", argv);
     perror("failed to execute child process");
     exit(1);
