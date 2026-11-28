@@ -10,3 +10,20 @@ if printf is used, if output is written to external fstreams like out.txt, error
 
 Build shell with gcc -Wall *.c -o s3
 ./s3
+
+TASK2:
+
+If input output fstreams are involved using different files, redirection is required.
+
+Need to cut args before <, > or >> operators as commands do not understand these operators (eg. ls)
+
+fd	name	used for
+0	stdin	input (the keyboard)
+1	stdout	normal output (the screen)
+2	stderr	error messages
+
+open or dup2 executed from child process to prevent parent pointing at out.txt
+
+Flags include O_WRONLY, O_CREAT, O_RDONLY, O_APPEND included in s3.h
+
+open() takes 0644 for output redirected as permission to create a new file.

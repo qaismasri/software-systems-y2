@@ -110,3 +110,98 @@ void launch_program(char *args[], int argsc)
     */
 
 }
+
+int command_with_redirection(char line[]){
+    if(strchr(line, '>') || strchr(line, '<')){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+int find_redirector_index(char *args[], int argsc){
+    for(int i = 0; i < argsc; i++){
+        if(strcmp(args[i], "<") == 0 || strcmp(args[i], ">") == 0 || strcmp(args[i], ">>") == 0){
+            return i;
+        }
+    }
+    return -1; // no value found
+}
+
+void child_with_output_redirected(char *args[], int argsc, char *filename, int is_append){
+    int flags = O_WRONLY | O_CREAT;
+    if(is_append){
+        flags = flags | O_APPEND;
+    }
+    else{
+        flags = flags | O_TRUNC; // > operator
+    }
+    
+    int fd = open(filename, flags, 0644);
+    if(fd == -1){
+        perror("error opening file");
+        exit(1);
+    }
+    int check = dup2(fd, STDOUT_FILENO); //STDOUT_FILENO is terminal output
+    if(check == -1){
+        perror("error reading file input");
+        exit(1);
+    }
+    close(fd);
+    child(args, argsc);
+}
+
+void child_with_input_redirected(char *args[], int argsc, char *filename){
+    int flags = O_RDONLY;
+    int fd = open(filename, flags);
+    if(fd == -1){
+        perror("error opening file");
+        exit(1);
+    }
+    int check = dup2(fd, STDIN_FILENO); // STDIN is keyboard / peripheral input
+    if(check == -1){
+        perror("error reading file input");
+        exit(1);
+    }
+    close(fd);
+    child(args, argsc);
+}
+
+void launch_program_with_redirection(char *args[], int argsc){
+    int pos = find_redirector_index(args, argsc);
+
+    ///ERROR1: pos not found
+    if(pos == -1){
+        perror("syntax error with operator");
+        return;
+    }
+
+    ///ERROR2: Filename not found
+    if(pos + 1 >= argsc){
+        perror("no filename supplied");
+        return;
+    }
+
+    char *operator = args[pos];
+    char *filename = args[pos + 1];
+
+    int op_out = !strcmp(args[pos], ">>");
+
+    args[pos] = NULL;
+    argsc = pos;
+
+    pid_t rc = fork();
+
+    if (rc < 0) {
+        perror("error forking child");
+        return;
+    }
+
+    else if (rc == 0) {
+        if (strcmp(operator, "<") == 0)
+            child_with_input_redirected(args, argsc, filename);
+        else
+            child_with_output_redirected(args, argsc, filename, op_out);
+    }
+}
