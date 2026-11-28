@@ -1,14 +1,20 @@
 #include "s3.h"
 
 ///Simple for now, but will be expanded in a following section
-void construct_shell_prompt(char shell_prompt[])
-{
-    ///string copy to array shell_prompt
-    strcpy(shell_prompt, "[s3]$ ");
+void construct_shell_prompt(char shell_prompt[]){
+    char cwd[MAX_PROMPT_LEN-6]; // current working directory
+
+    if (getcwd(cwd, MAX_PROMPT_LEN-6) == NULL) {
+        /// if folder not found, use default
+        strcpy(shell_prompt, "[s3]$");
+        return;
+    }
+
+    snprintf(shell_prompt, MAX_PROMPT_LEN, "[%s s3]$", cwd);
 }
 
 ///Prints a shell prompt and reads input from the user
-void read_command_line(char line[])
+void read_command_line(char line[], char lwd[])
 {
     char shell_prompt[MAX_PROMPT_LEN];
     construct_shell_prompt(shell_prompt);
@@ -204,4 +210,62 @@ void launch_program_with_redirection(char *args[], int argsc){
         else
             child_with_output_redirected(args, argsc, filename, op_out);
     }
+}
+
+int is_cd(char line[]){
+    ///line starts with either "cd *" or is just "cd"
+    if(strncmp(line, "cd", 2) == 0 && (line[2] == ' ' || line[2] == '\0')){
+        return 1;
+   }
+   else return 0;
+}
+
+void init_lwd(char lwd[]){
+    if(getcwd(lwd, MAX_PROMPT_LEN-6) == NULL){
+        perror("error fetching directory");
+    }
+}
+
+void run_cd(char *args[], int argsc, char lwd[]){
+
+    /// separate cases of cd input
+    char *dest;
+
+    ///CASE 1: cd
+    if(argsc == 1){
+        dest = getenv("HOME");
+        if(dest == NULL){
+            perror("Home cannot be found");
+            return;
+        }
+    }
+
+    ///CASE 2: cd aaa bbb (error)
+    else if(argsc > 2){
+        perror("too many arguments for cd");
+        return;
+    }
+    else{
+        ///CASE 3: cd -
+        if(strcmp(args[1], "-") == 0){
+            dest = lwd;
+        }
+        ///CASE 4: cd aaa
+        else{
+            dest = args[1];
+        }
+    }
+
+    char cwd[MAX_PROMPT_LEN-6];
+    if (getcwd(cwd, MAX_PROMPT_LEN-6) == NULL) {
+        perror("current directory not found");
+        return;
+    }
+
+    if (chdir(dest) == -1) {
+        perror("requested directory not found");
+        return;
+    }
+
+    strcpy(lwd, cwd);
 }

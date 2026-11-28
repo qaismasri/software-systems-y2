@@ -27,3 +27,10 @@ open or dup2 executed from child process to prevent parent pointing at out.txt
 Flags include O_WRONLY, O_CREAT, O_RDONLY, O_APPEND included in s3.h
 
 open() takes 0644 for output redirected as permission to create a new file.
+
+TASK 3: cd implementation
+
+getcwd returns path of current working directory
+lwd is last working directory
+
+could think abt make it nicer with space, max prompt len - 7 then
